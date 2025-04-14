@@ -56,7 +56,7 @@ export class App extends Component {
 
   toggleComplete=(id)=>{
     this.setState((prevState)=>({
-      todos: prevState.todos.map((todo)=>(todo.id == id ? {...todo, completed: !todo.completed} : todo))
+      todos: prevState.todos.map((todo)=>(todo.id === id ? {...todo, completed: !todo.completed} : todo))
     }))
     }
 
