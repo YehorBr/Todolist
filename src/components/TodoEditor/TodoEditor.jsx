@@ -1,33 +1,27 @@
-import { Component } from "react";
+import { Component, useState } from "react";
 import { AddButton } from "./TodoEditor.styled";
 
-export class TodoEditor extends Component {
+export const TodoEditor = ({addTodo, handleCloseModal})=>{
+    const [textValue, setTextValue] = useState('')
 
-    state={
-        textValue: '',
+    const handleChange = (e) =>{
+        setTextValue(e.currentTarget.value)
     }
 
-
-    handleChange = (e) =>{
-        this.setState({textValue: e.currentTarget.value})
-    }
-
-    handleSubmit = (e)=>{
+    const handleSubmit = (e)=>{
         e.preventDefault()
 
-        this.props.addTodo(this.state.textValue)
+        addTodo(textValue)
 
-        this.props.handleCloseModal()
+        handleCloseModal()
 
         e.currentTarget.reset()
     }
 
-    render(){
-        
-        return<>
-        <form action="" onSubmit={this.handleSubmit}>
+    return<>
+        <form action="" onSubmit={handleSubmit}>
             <label htmlFor="">
-                <textarea name="edit" id="" value={this.state.textValue} onChange={this.handleChange}></textarea>
+                <textarea name="edit" id="" value={textValue} onChange={handleChange}></textarea>
             </label>
             <br />
             <AddButton>Додати</AddButton>
@@ -35,5 +29,5 @@ export class TodoEditor extends Component {
         
 
         </>
-    }
+
 }

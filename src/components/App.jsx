@@ -1,22 +1,28 @@
-import { Component } from "react";
-import { GlobalStyle } from "../GlobalStyle";
-import { Container } from "./Container/Container";
-import { TodoList } from "./TodoList/TodoList";
-import { TodoEditor } from "./TodoEditor/TodoEditor";
-import { Info } from "./Info/Info";
-import initialTodos from '../todo.json'
-import { Filter } from "./Filter/Filter";
-import { Modal } from "./Modal/Modal";
-import { AddButton } from "./TodoEditor/TodoEditor.styled";
+import { useEffect, useState } from 'react';
+import { GlobalStyle } from '../GlobalStyle';
+import { Container } from './Container/Container';
+import { TodoList } from './TodoList/TodoList';
+import { TodoEditor } from './TodoEditor/TodoEditor';
+import { Info } from './Info/Info';
+import initialTodos from '../todo.json';
+import { Filter } from './Filter/Filter';
+import { Modal } from './Modal/Modal';
+import { AddButton } from './TodoEditor/TodoEditor.styled';
 
+export const App = () => {
+  const [todos, setTodos] = useState(initialTodos);
+  const [showModal, setModal] = useState(false);
+  const [filter, setFilter] = useState('');
 
-export class App extends Component {
-  
-  state={
-    todos: initialTodos,
-    showModal: false,
-    filter: '',
-  }
+  useEffect(() => {
+    return () => {
+      const todos = localStorage.getItem('todos');
+      if (todos) {
+        const parsedTodos = JSON.parse(todos);
+        setTodos({ parsedTodos });
+      }
+    };
+  }, []);
 
   // componentDidMount(){
   //   const todos = localStorage.getItem('todos')
@@ -24,7 +30,6 @@ export class App extends Component {
   //     const parsedTodos = JSON.parse(todos)
   //     this.setState({todos: parsedTodos})
   //   }
-
 
   // }
 
@@ -35,63 +40,65 @@ export class App extends Component {
   //   }
   // }
 
-
-  deleteTodo = (id) => {
-    this.setState((prevState) => ({
-      todos: prevState.todos.filter((todo) => todo.id !== id),
-    }));
+  const deleteTodo = id => {
+    setTodos(prevState => prevState.filter(todo => todo.id !== id));
   };
 
-  addTodo = (todoText)=>{
+  const addTodo = todoText => {
     const newTodo = {
       id: Date.now(),
       text: todoText,
-      completed: false
+      completed: false,
     };
 
-    this.setState((prevState)=>({
-      todos: [...prevState.todos, newTodo]
-    })) 
+    setTodos(prevState => [...prevState, newTodo]);
   };
 
-  toggleComplete=(id)=>{
-    this.setState((prevState)=>({
-      todos: prevState.todos.map((todo)=>(todo.id === id ? {...todo, completed: !todo.completed} : todo))
-    }))
-    }
+  const toggleComplete = id => {
+    setTodos(prevState => {
+      prevState.map(todo =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      );
+    });
+  };
 
-    filterTodo = (text) => {
-      this.setState({filter: text})
-    }
+  const filterTodo = text => {
+    setFilter({ text });
+  };
 
-    handleShowModal = () => {
-      this.setState((prevState)=>({
-        showModal: !prevState.showModal
-      }))
-    }
+  const handleShowModal = () => {
+    setModal(prevState => !prevState);
+  };
 
-    
+  const filtered = todos.filter(todo =>
+    todo.text.toLowerCase().includes(filter.toLowerCase()));
 
-  
-  render(){
-    const filtered = this.state.todos.filter(todo=>todo.text.toLowerCase().includes(this.state.filter.toLowerCase()))
+  const todoQuantity = todos.length;
 
-    const todoQuantity = this.state.todos.length;
+  return (
+    <>
+      <GlobalStyle />
+      <Container>
+        <AddButton onClick={handleShowModal} type="button">
+          Додати задачу
+        </AddButton>
+        <Filter filterTodo={filterTodo} state={filter} />
+        <TodoList
+          onDelete={deleteTodo}
+          todos={filtered}
+          toggleComplete={toggleComplete}
+        />
 
-  return <>
-    <GlobalStyle/>
-    <Container>
-      <AddButton onClick={this.handleShowModal} type="button">Додати задачу</AddButton>
-      <Filter  filterTodo = {this.filterTodo} state={this.state.filter}/>
-      <TodoList
-        onDelete = {this.deleteTodo}
-        todos={filtered}
-        toggleComplete={this.toggleComplete}/>
-
-      
-
-      <Info todoQuantity={todoQuantity}/>
-      {this.state.showModal && <Modal handleCloseModal={this.handleShowModal}><TodoEditor addTodo={this.addTodo} handleCloseModal={this.handleShowModal}/></Modal>}
-      
-    </Container>
-</>}};
+        <Info todoQuantity={todoQuantity} />
+        {showModal && (
+          <Modal handleCloseModal={handleShowModal}>
+            <TodoEditor
+              addTodo={addTodo}
+              handleCloseModal={handleShowModal}
+            />
+          </Modal>
+        )}
+      </Container>
+    </>
+  );
+};

@@ -1,33 +1,32 @@
-import { Component } from 'react';
+import { Component, useEffect } from 'react';
 import css from './Modal.module.css';
 
-export class Modal extends Component {
+export const Modal = ({ handleCloseModal, children }) => {
+  useEffect(() => {
+    window.addEventListener('keydown', onEscapeClose);
+  }, []);
 
-    componentDidMount(){
-          window.addEventListener('keydown', this.onEscapeClose)
+  useEffect(()=>{
+    return () => {
+      window.removeEventListener('keydown', onEscapeClose);
+    };
+  })
+
+  const onEscapeClose = e => {
+    if (e.key === 'Escape') { 
+      handleCloseModal();
     }
+  };
 
-    componentWillUnmount(){
-      window.removeEventListener('keydown', this.onEscapeClose)
+  const onClose = e => {
+    if (e.target === e.currentTarget) {
+      handleCloseModal();
     }
+  };
 
-    onEscapeClose = (e)=>{
-      if(e.key === 'Escape'){
-          this.props.handleCloseModal()
-      }
-  }
-
-  onClose = (e) =>{
-    if(e.target === e.currentTarget){
-      this.props.handleCloseModal()
-    }
-  }
-
-  render() {
-    return (
-      <div onClick={this.onClose}  className={css.backdrop}>
-        <div className={css.module}>{this.props.children}</div>
-      </div>
-    );
-  }
-}
+  return (
+    <div onClick={onClose} className={css.backdrop}>
+      <div className={css.module}>{children}</div>
+    </div>
+  );
+};
